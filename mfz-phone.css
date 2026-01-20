@@ -1,14 +1,51 @@
 /**
  * MFZ Phone - Styles for International Phone Input
+ * Meydan Branding Design System
  * 
  * Works with intl-tel-input library and Webflow forms
- * @version 1.0.0
+ * @version 2.0.0
  */
 
-/* Container */
+/* ========================================
+   Design Tokens - Meydan Brand
+   ======================================== */
+:root {
+  /* Colors */
+  --mfz-white: #FFFFFF;
+  --mfz-grey: #F5F5F5;
+  --mfz-border: #EDEDED;
+  --mfz-black: #1C1C1C;
+  --mfz-primary-green: #06603A;
+  --mfz-accent-red: #FF2D2D;
+  --mfz-validating: #F39C12;
+  
+  /* Typography */
+  --mfz-font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --mfz-font-size: 16px;
+  --mfz-font-weight: 500;
+  --mfz-line-height: 24px;
+  
+  /* Spacing */
+  --mfz-padding-x: 16px;
+  --mfz-padding-y: 12px;
+  --mfz-gap: 6px;
+  --mfz-gap-inner: 4px;
+  
+  /* Border */
+  --mfz-border-radius: 8px;
+  --mfz-border-width: 1px;
+  
+  /* Opacity */
+  --mfz-placeholder-opacity: 0.5;
+}
+
+/* ========================================
+   Container
+   ======================================== */
 .mfz-phone-container {
   position: relative;
   width: 100%;
+  font-family: var(--mfz-font-family);
 }
 
 /* Ensure the intl-tel-input takes full width */
@@ -18,50 +55,119 @@
 
 .mfz-phone-container .iti__tel-input {
   width: 100%;
+  background: var(--mfz-white);
+  border: var(--mfz-border-width) solid var(--mfz-border);
+  border-radius: var(--mfz-border-radius);
+  padding: var(--mfz-padding-y) var(--mfz-padding-x);
+  padding-right: 44px;
+  font-family: var(--mfz-font-family);
+  font-size: var(--mfz-font-size);
+  font-weight: var(--mfz-font-weight);
+  line-height: var(--mfz-line-height);
+  color: var(--mfz-black);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Override intl-tel-input styles to match Webflow */
-.mfz-phone-container .iti--separate-dial-code .iti__selected-dial-code {
-  font-size: inherit;
-  color: inherit;
+.mfz-phone-container .iti__tel-input::placeholder {
+  color: var(--mfz-black);
+  opacity: var(--mfz-placeholder-opacity);
 }
 
+/* ========================================
+   Country Selector
+   ======================================== */
 .mfz-phone-container .iti__country-container {
   padding: 0;
 }
 
 .mfz-phone-container .iti__selected-country {
+  display: flex;
+  align-items: center;
+  gap: var(--mfz-gap-inner);
   background: transparent;
-  border-right: 1px solid rgba(0, 0, 0, 0.1);
-  padding-right: 8px;
+  border: none;
+  padding: 0 var(--mfz-gap) 0 var(--mfz-padding-x);
+  border-right: none;
+  height: 100%;
 }
 
 .mfz-phone-container .iti__selected-country:hover,
 .mfz-phone-container .iti__selected-country:focus {
-  background: rgba(0, 0, 0, 0.05);
+  background: transparent;
 }
 
-/* Dropdown styling */
+/* Flag styling */
+.mfz-phone-container .iti__flag {
+  border-radius: 2px;
+  box-shadow: 0 0 0 0.5px var(--mfz-grey);
+}
+
+/* Dial code styling */
+.mfz-phone-container .iti--separate-dial-code .iti__selected-dial-code {
+  font-family: var(--mfz-font-family);
+  font-size: var(--mfz-font-size);
+  font-weight: var(--mfz-font-weight);
+  line-height: var(--mfz-line-height);
+  color: var(--mfz-black);
+  opacity: var(--mfz-placeholder-opacity);
+  margin-left: var(--mfz-gap-inner);
+}
+
+/* Dropdown arrow */
+.mfz-phone-container .iti__arrow {
+  border: none;
+  width: 20px;
+  height: 20px;
+  margin-left: 2px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%231C1C1C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: var(--mfz-placeholder-opacity);
+}
+
+.mfz-phone-container .iti__arrow--up {
+  transform: rotate(180deg);
+}
+
+/* ========================================
+   Dropdown Styling
+   ======================================== */
 .mfz-phone-container .iti__dropdown-content {
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: var(--mfz-white);
+  border-radius: var(--mfz-border-radius);
+  box-shadow: 0 4px 24px rgba(28, 28, 28, 0.12);
+  border: var(--mfz-border-width) solid var(--mfz-border);
   max-height: 300px;
+  margin-top: 4px;
 }
 
 .mfz-phone-container .iti__search-input {
-  border-radius: 6px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  padding: 8px 12px;
+  font-family: var(--mfz-font-family);
   font-size: 14px;
+  font-weight: var(--mfz-font-weight);
+  border-radius: 6px;
+  border: var(--mfz-border-width) solid var(--mfz-border);
+  padding: 10px 12px;
   margin: 8px;
   width: calc(100% - 16px);
+  color: var(--mfz-black);
+  background: var(--mfz-white);
+}
+
+.mfz-phone-container .iti__search-input::placeholder {
+  color: var(--mfz-black);
+  opacity: var(--mfz-placeholder-opacity);
 }
 
 .mfz-phone-container .iti__search-input:focus {
   outline: none;
-  border-color: #3898ec;
-  box-shadow: 0 0 0 2px rgba(56, 152, 236, 0.2);
+  border-color: var(--mfz-primary-green);
+  box-shadow: 0 0 0 3px rgba(6, 96, 58, 0.12);
+}
+
+.mfz-phone-container .iti__country-list {
+  font-family: var(--mfz-font-family);
 }
 
 .mfz-phone-container .iti__country {
@@ -71,52 +177,72 @@
 
 .mfz-phone-container .iti__country:hover,
 .mfz-phone-container .iti__country--highlight {
-  background-color: rgba(56, 152, 236, 0.1);
+  background-color: var(--mfz-grey);
 }
 
-/* Validation States */
+.mfz-phone-container .iti__country-name {
+  font-size: 14px;
+  font-weight: var(--mfz-font-weight);
+  color: var(--mfz-black);
+}
+
+.mfz-phone-container .iti__dial-code {
+  font-size: 14px;
+  color: var(--mfz-black);
+  opacity: var(--mfz-placeholder-opacity);
+}
+
+/* ========================================
+   Validation States
+   ======================================== */
 
 /* Valid state */
 .mfz-phone-container.mfz-valid .iti__tel-input {
-  border-color: #2ecc71 !important;
-  background-color: rgba(46, 204, 113, 0.05);
+  border-color: var(--mfz-primary-green);
+  background-color: rgba(6, 96, 58, 0.04);
 }
 
 .mfz-phone-container.mfz-valid::after {
-  content: '✓';
+  content: '';
   position: absolute;
-  right: 12px;
+  right: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: #2ecc71;
-  font-size: 18px;
-  font-weight: bold;
+  width: 20px;
+  height: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2306603A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
   pointer-events: none;
   z-index: 1;
 }
 
 /* Invalid state */
 .mfz-phone-container.mfz-invalid .iti__tel-input {
-  border-color: #e74c3c !important;
-  background-color: rgba(231, 76, 60, 0.05);
+  border-color: var(--mfz-accent-red);
+  background-color: rgba(255, 45, 45, 0.04);
 }
 
 .mfz-phone-container.mfz-invalid::after {
-  content: '✕';
+  content: '';
   position: absolute;
-  right: 12px;
+  right: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: #e74c3c;
-  font-size: 18px;
-  font-weight: bold;
+  width: 20px;
+  height: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23FF2D2D' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18'/%3E%3Cpath d='m6 6 12 12'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
   pointer-events: none;
   z-index: 1;
 }
 
 /* Validating state */
 .mfz-phone-container.mfz-validating .iti__tel-input {
-  border-color: #f39c12 !important;
+  border-color: var(--mfz-validating);
 }
 
 .mfz-phone-container.mfz-validating::after {
@@ -125,9 +251,9 @@
   right: 14px;
   top: 50%;
   transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  border: 2px solid #f39c12;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--mfz-validating);
   border-top-color: transparent;
   border-radius: 50%;
   animation: mfz-spin 0.8s linear infinite;
@@ -141,110 +267,112 @@
   }
 }
 
-/* Feedback message */
+/* ========================================
+   Focus State
+   ======================================== */
+.mfz-phone-container .iti__tel-input:focus {
+  outline: none;
+  border-color: var(--mfz-primary-green);
+  box-shadow: 0 0 0 3px rgba(6, 96, 58, 0.12);
+}
+
+/* ========================================
+   Feedback Message
+   ======================================== */
 .mfz-phone-feedback {
-  font-size: 12px;
-  margin-top: 4px;
+  font-family: var(--mfz-font-family);
+  font-size: 13px;
+  font-weight: var(--mfz-font-weight);
+  line-height: 1.4;
+  margin-top: 6px;
   min-height: 18px;
   transition: all 0.2s ease;
 }
 
 .mfz-phone-feedback.mfz-feedback-valid {
-  color: #2ecc71;
+  color: var(--mfz-primary-green);
 }
 
 .mfz-phone-feedback.mfz-feedback-invalid {
-  color: #e74c3c;
+  color: var(--mfz-accent-red);
 }
 
 .mfz-phone-feedback.mfz-feedback-validating {
-  color: #f39c12;
+  color: var(--mfz-validating);
 }
 
 .mfz-phone-feedback.mfz-feedback-idle {
   visibility: hidden;
 }
 
-/* Focus state enhancement */
-.mfz-phone-container .iti__tel-input:focus {
-  outline: none;
-  border-color: #3898ec !important;
-  box-shadow: 0 0 0 3px rgba(56, 152, 236, 0.2);
-}
-
-/* Ensure proper input padding for validation icon */
-.mfz-phone-container .iti__tel-input {
-  padding-right: 40px !important;
-}
-
-/* Mobile responsive */
+/* ========================================
+   Mobile Responsive
+   ======================================== */
 @media (max-width: 768px) {
+  :root {
+    --mfz-padding-x: 14px;
+    --mfz-padding-y: 10px;
+  }
+  
   .mfz-phone-container .iti__dropdown-content {
-    max-height: 250px;
+    max-height: 260px;
   }
   
   .mfz-phone-container .iti__country {
     padding: 12px;
   }
-  
-  .mfz-phone-container .iti__selected-country {
-    padding-left: 8px;
-    padding-right: 6px;
-  }
 }
 
-/* Dark mode support (auto-detect) */
+/* ========================================
+   Dark Mode Support
+   ======================================== */
 @media (prefers-color-scheme: dark) {
-  .mfz-phone-container .iti__selected-country:hover,
-  .mfz-phone-container .iti__selected-country:focus {
-    background: rgba(255, 255, 255, 0.1);
+  :root {
+    --mfz-white: #1A1A1A;
+    --mfz-grey: #2A2A2A;
+    --mfz-border: #333333;
+    --mfz-black: #FFFFFF;
   }
   
-  .mfz-phone-container .iti__dropdown-content {
-    background: #1a1a1a;
-    border-color: rgba(255, 255, 255, 0.1);
+  .mfz-phone-container .iti__arrow {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   }
   
-  .mfz-phone-container .iti__search-input {
-    background: #2a2a2a;
-    border-color: rgba(255, 255, 255, 0.15);
-    color: #fff;
+  .mfz-phone-container.mfz-valid::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2306603A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
   }
   
-  .mfz-phone-container .iti__country:hover,
-  .mfz-phone-container .iti__country--highlight {
-    background-color: rgba(56, 152, 236, 0.2);
-  }
-  
-  .mfz-phone-container .iti__country-name,
-  .mfz-phone-container .iti__dial-code {
-    color: #fff;
+  .mfz-phone-container.mfz-invalid::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23FF2D2D' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18'/%3E%3Cpath d='m6 6 12 12'/%3E%3C/svg%3E");
   }
 }
 
-/* Webflow form integration - ensure proper spacing */
+/* ========================================
+   Webflow Integration
+   ======================================== */
 .w-form .mfz-phone-container {
   margin-bottom: 0;
 }
 
 .w-form .mfz-phone-feedback {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
-/* Animation for state changes */
-.mfz-phone-container .iti__tel-input {
-  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-/* RTL support */
+/* ========================================
+   RTL Support
+   ======================================== */
 [dir="rtl"] .mfz-phone-container.mfz-valid::after,
 [dir="rtl"] .mfz-phone-container.mfz-invalid::after,
 [dir="rtl"] .mfz-phone-container.mfz-validating::after {
   right: auto;
-  left: 12px;
+  left: 14px;
 }
 
 [dir="rtl"] .mfz-phone-container .iti__tel-input {
-  padding-right: inherit !important;
-  padding-left: 40px !important;
+  padding-right: inherit;
+  padding-left: 44px;
+}
+
+[dir="rtl"] .mfz-phone-container .iti__selected-country {
+  padding: 0 var(--mfz-padding-x) 0 var(--mfz-gap);
 }
