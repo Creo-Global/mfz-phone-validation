@@ -56,6 +56,9 @@
   padding: 0 6px 0 16px;
   border-right: none;
   height: 100%;
+
+  font-size: 16px;
+  color: #1c1c1c78;
 }
 
 .mfz-phone-container .iti__selected-country:hover,
@@ -166,14 +169,13 @@
 /* Valid state */
 .mfz-phone-container.mfz-valid .iti__tel-input {
   border-color: #06603A;
-  background-color: rgba(6, 96, 58, 0.04);
 }
 
 .mfz-phone-container.mfz-valid::after {
   content: '';
   position: absolute;
   right: 14px;
-  top: 50%;
+  top: 24px;
   transform: translateY(-50%);
   width: 20px;
   height: 20px;
@@ -188,14 +190,13 @@
 /* Invalid state */
 .mfz-phone-container.mfz-invalid .iti__tel-input {
   border-color: #FF2D2D;
-  background-color: rgba(255, 45, 45, 0.04);
 }
 
 .mfz-phone-container.mfz-invalid::after {
   content: '';
   position: absolute;
   right: 14px;
-  top: 50%;
+  top: 24px;
   transform: translateY(-50%);
   width: 20px;
   height: 20px;
@@ -216,7 +217,7 @@
   content: '';
   position: absolute;
   right: 14px;
-  top: 33%;
+  top: 24px;
   transform: translateY(-50%);
   width: 18px;
   height: 18px;

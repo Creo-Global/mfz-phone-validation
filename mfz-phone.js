@@ -528,8 +528,8 @@
       phone = `+${countryData.dialCode}${digitsOnly}`;
     }
 
-    // Show validating state
-    updateValidationState(input, 'validating', CONFIG.validationMessages.validating);
+    // Show validating state (spinner only, no message)
+    updateValidationState(input, 'validating', '');
 
     // Call validation API
     const result = await validatePhoneNumber(phone, countryData.iso2);

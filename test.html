@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MFZ Phone - Test Page</title>
+  
+  <!-- intl-tel-input CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/css/intlTelInput.css">
+  
+  <!-- MFZ Phone CSS -->
+  <link rel="stylesheet" href="mfz-phone.css">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 40px 20px;
+      color: #fff;
+    }
+    
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    
+    .subtitle {
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 40px;
+    }
+    
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 32px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .form-group {
+      margin-bottom: 24px;
+    }
+    
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"] {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      transition: all 0.2s ease;
+    }
+    
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="tel"]:focus {
+      outline: none;
+      border-color: #3898ec;
+      box-shadow: 0 0 0 3px rgba(56, 152, 236, 0.2);
+    }
+    
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+    
+    button[type="submit"] {
+      width: 100%;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, #3898ec 0%, #2563eb 100%);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    button[type="submit"]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(56, 152, 236, 0.3);
+    }
+    
+    button[type="submit"]:active {
+      transform: translateY(0);
+    }
+    
+    .success-message {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .success-message.show {
+      display: block;
+    }
+    
+    .success-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    
+    /* Override intl-tel-input for dark theme */
+    .iti__country-container {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px 0 0 8px;
+    }
+    
+    .iti__selected-country {
+      border-radius: 8px 0 0 8px;
+    }
+    
+    .iti__dropdown-content {
+      background: #1a1a2e;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .iti__search-input {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+    
+    .iti__country-name,
+    .iti__dial-code {
+      color: #fff;
+    }
+    
+    .iti__country:hover,
+    .iti__country--highlight {
+      background: rgba(56, 152, 236, 0.2);
+    }
+    
+    .detected-country {
+      display: inline-block;
+      background: rgba(56, 152, 236, 0.2);
+      color: #3898ec;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      margin-bottom: 20px;
+    }
+    
+    /* Console output */
+    .console {
+      margin-top: 30px;
+      background: #0d1117;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .console-line {
+      margin: 4px 0;
+      color: #8b949e;
+    }
+    
+    .console-line.info {
+      color: #58a6ff;
+    }
+    
+    .console-line.success {
+      color: #3fb950;
+    }
+    
+    .console-line.error {
+      color: #f85149;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>MFZ Phone</h1>
+    <p class="subtitle">International phone input with IP detection & validation</p>
+    
+    <div id="detected" class="detected-country">Detecting your country...</div>
+    
+    <div class="card">
+      <form id="testForm">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" placeholder="John Doe" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="john@example.com" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="phone">Phone Number *</label>
+          <input type="tel" id="phone" name="phone" data-mfz-phone placeholder="Enter your phone number" required>
+        </div>
+        
+        <button type="submit">Submit Form</button>
+        
+        <div id="success" class="success-message">
+          <div class="success-icon">✓</div>
+          <h3>Form Submitted!</h3>
+          <p>Phone validated successfully.</p>
+        </div>
+      </form>
+    </div>
+    
+    <div class="console" id="console">
+      <div class="console-line info">MFZ Phone Test Console</div>
+    </div>
+  </div>
+  
+  <!-- intl-tel-input Library -->
+  <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/intlTelInput.min.js"></script>
+  
+  <!-- MFZ Phone Library -->
+  <script src="mfz-phone.js"></script>
+  
+  <script>
+    // Console logger
+    const consoleEl = document.getElementById('console');
+    const log = (message, type = 'info') => {
+      const line = document.createElement('div');
+      line.className = `console-line ${type}`;
+      line.textContent = `> ${message}`;
+      consoleEl.appendChild(line);
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+    };
+    
+    // Override console.log to show in our console
+    const originalLog = console.log;
+    console.log = (...args) => {
+      originalLog(...args);
+      log(args.join(' '), 'info');
+    };
+    
+    const originalWarn = console.warn;
+    console.warn = (...args) => {
+      originalWarn(...args);
+      log(args.join(' '), 'error');
+    };
+    
+    // Show detected country
+    setTimeout(async () => {
+      const country = sessionStorage.getItem('mfz_detected_country') || 'detecting...';
+      document.getElementById('detected').textContent = `🌍 Detected: ${country.toUpperCase()}`;
+      log(`Country detected: ${country.toUpperCase()}`, 'success');
+    }, 500);
+    
+    // Form submit handler
+    document.getElementById('testForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const phoneInput = document.querySelector('[data-mfz-phone]');
+      const isValid = MFZPhone.isValid(phoneInput);
+      const formatted = MFZPhone.getFormattedNumber(phoneInput);
+      
+      if (isValid) {
+        log(`Form submitted! Phone: ${formatted}`, 'success');
+        document.getElementById('success').classList.add('show');
+        
+        // Log all form data
+        const formData = new FormData(e.target);
+        for (const [key, value] of formData.entries()) {
+          log(`  ${key}: ${value}`, 'info');
+        }
+        log(`  phone_formatted: ${formatted}`, 'info');
+      } else {
+        log('Form blocked: Invalid phone number', 'error');
+      }
+    });
+  </script>
+</body>
+</html>
