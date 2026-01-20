@@ -7,45 +7,12 @@
  */
 
 /* ========================================
-   Design Tokens - Meydan Brand
-   ======================================== */
-:root {
-  /* Colors */
-  --mfz-white: #FFFFFF;
-  --mfz-grey: #F5F5F5;
-  --mfz-border: #EDEDED;
-  --mfz-black: #1C1C1C;
-  --mfz-primary-green: #06603A;
-  --mfz-accent-red: #FF2D2D;
-  --mfz-validating: #F39C12;
-  
-  /* Typography */
-  --mfz-font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --mfz-font-size: 16px;
-  --mfz-font-weight: 500;
-  --mfz-line-height: 24px;
-  
-  /* Spacing */
-  --mfz-padding-x: 16px;
-  --mfz-padding-y: 12px;
-  --mfz-gap: 6px;
-  --mfz-gap-inner: 4px;
-  
-  /* Border */
-  --mfz-border-radius: 8px;
-  --mfz-border-width: 1px;
-  
-  /* Opacity */
-  --mfz-placeholder-opacity: 0.5;
-}
-
-/* ========================================
    Container
    ======================================== */
 .mfz-phone-container {
   position: relative;
   width: 100%;
-  font-family: var(--mfz-font-family);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Ensure the intl-tel-input takes full width */
@@ -55,22 +22,22 @@
 
 .mfz-phone-container .iti__tel-input {
   width: 100%;
-  background: var(--mfz-white);
-  border: var(--mfz-border-width) solid var(--mfz-border);
-  border-radius: var(--mfz-border-radius);
-  padding: var(--mfz-padding-y) var(--mfz-padding-x);
+  background: #FFFFFF;
+  border: 1px solid #EDEDED;
+  border-radius: 8px;
+  padding: 12px 16px;
   padding-right: 44px;
-  font-family: var(--mfz-font-family);
-  font-size: var(--mfz-font-size);
-  font-weight: var(--mfz-font-weight);
-  line-height: var(--mfz-line-height);
-  color: var(--mfz-black);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #1C1C1C;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .mfz-phone-container .iti__tel-input::placeholder {
-  color: var(--mfz-black);
-  opacity: var(--mfz-placeholder-opacity);
+  color: #1C1C1C;
+  opacity: 0.5;
 }
 
 /* ========================================
@@ -83,10 +50,10 @@
 .mfz-phone-container .iti__selected-country {
   display: flex;
   align-items: center;
-  gap: var(--mfz-gap-inner);
+  gap: 4px;
   background: transparent;
   border: none;
-  padding: 0 var(--mfz-gap) 0 var(--mfz-padding-x);
+  padding: 0 6px 0 16px;
   border-right: none;
   height: 100%;
 }
@@ -99,18 +66,18 @@
 /* Flag styling */
 .mfz-phone-container .iti__flag {
   border-radius: 2px;
-  box-shadow: 0 0 0 0.5px var(--mfz-grey);
+  box-shadow: 0 0 0 0.5px #F5F5F5;
 }
 
 /* Dial code styling */
 .mfz-phone-container .iti--separate-dial-code .iti__selected-dial-code {
-  font-family: var(--mfz-font-family);
-  font-size: var(--mfz-font-size);
-  font-weight: var(--mfz-font-weight);
-  line-height: var(--mfz-line-height);
-  color: var(--mfz-black);
-  opacity: var(--mfz-placeholder-opacity);
-  margin-left: var(--mfz-gap-inner);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #1C1C1C;
+  opacity: 0.5;
+  margin-left: 4px;
 }
 
 /* Dropdown arrow */
@@ -123,7 +90,7 @@
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  opacity: var(--mfz-placeholder-opacity);
+  opacity: 0.5;
 }
 
 .mfz-phone-container .iti__arrow--up {
@@ -134,40 +101,40 @@
    Dropdown Styling
    ======================================== */
 .mfz-phone-container .iti__dropdown-content {
-  background: var(--mfz-white);
-  border-radius: var(--mfz-border-radius);
+  background: #FFFFFF;
+  border-radius: 8px;
   box-shadow: 0 4px 24px rgba(28, 28, 28, 0.12);
-  border: var(--mfz-border-width) solid var(--mfz-border);
+  border: 1px solid #EDEDED;
   max-height: 300px;
   margin-top: 4px;
 }
 
 .mfz-phone-container .iti__search-input {
-  font-family: var(--mfz-font-family);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
-  font-weight: var(--mfz-font-weight);
+  font-weight: 500;
   border-radius: 6px;
-  border: var(--mfz-border-width) solid var(--mfz-border);
+  border: 1px solid #EDEDED;
   padding: 10px 12px;
   margin: 8px;
   width: calc(100% - 16px);
-  color: var(--mfz-black);
-  background: var(--mfz-white);
+  color: #1C1C1C;
+  background: #FFFFFF;
 }
 
 .mfz-phone-container .iti__search-input::placeholder {
-  color: var(--mfz-black);
-  opacity: var(--mfz-placeholder-opacity);
+  color: #1C1C1C;
+  opacity: 0.5;
 }
 
 .mfz-phone-container .iti__search-input:focus {
   outline: none;
-  border-color: var(--mfz-primary-green);
+  border-color: #06603A;
   box-shadow: 0 0 0 3px rgba(6, 96, 58, 0.12);
 }
 
 .mfz-phone-container .iti__country-list {
-  font-family: var(--mfz-font-family);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .mfz-phone-container .iti__country {
@@ -177,19 +144,19 @@
 
 .mfz-phone-container .iti__country:hover,
 .mfz-phone-container .iti__country--highlight {
-  background-color: var(--mfz-grey);
+  background-color: #F5F5F5;
 }
 
 .mfz-phone-container .iti__country-name {
   font-size: 14px;
-  font-weight: var(--mfz-font-weight);
-  color: var(--mfz-black);
+  font-weight: 500;
+  color: #1C1C1C;
 }
 
 .mfz-phone-container .iti__dial-code {
   font-size: 14px;
-  color: var(--mfz-black);
-  opacity: var(--mfz-placeholder-opacity);
+  color: #1C1C1C;
+  opacity: 0.5;
 }
 
 /* ========================================
@@ -198,7 +165,7 @@
 
 /* Valid state */
 .mfz-phone-container.mfz-valid .iti__tel-input {
-  border-color: var(--mfz-primary-green);
+  border-color: #06603A;
   background-color: rgba(6, 96, 58, 0.04);
 }
 
@@ -220,7 +187,7 @@
 
 /* Invalid state */
 .mfz-phone-container.mfz-invalid .iti__tel-input {
-  border-color: var(--mfz-accent-red);
+  border-color: #FF2D2D;
   background-color: rgba(255, 45, 45, 0.04);
 }
 
@@ -242,7 +209,7 @@
 
 /* Validating state */
 .mfz-phone-container.mfz-validating .iti__tel-input {
-  border-color: var(--mfz-validating);
+  border-color: #F39C12;
 }
 
 .mfz-phone-container.mfz-validating::after {
@@ -253,7 +220,7 @@
   transform: translateY(-50%);
   width: 18px;
   height: 18px;
-  border: 2px solid var(--mfz-validating);
+  border: 2px solid #F39C12;
   border-top-color: transparent;
   border-radius: 50%;
   animation: mfz-spin 0.8s linear infinite;
@@ -272,7 +239,7 @@
    ======================================== */
 .mfz-phone-container .iti__tel-input:focus {
   outline: none;
-  border-color: var(--mfz-primary-green);
+  border-color: #06603A;
   box-shadow: 0 0 0 3px rgba(6, 96, 58, 0.12);
 }
 
@@ -280,9 +247,9 @@
    Feedback Message
    ======================================== */
 .mfz-phone-feedback {
-  font-family: var(--mfz-font-family);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 13px;
-  font-weight: var(--mfz-font-weight);
+  font-weight: 500;
   line-height: 1.4;
   margin-top: 6px;
   min-height: 18px;
@@ -290,15 +257,15 @@
 }
 
 .mfz-phone-feedback.mfz-feedback-valid {
-  color: var(--mfz-primary-green);
+  color: #06603A;
 }
 
 .mfz-phone-feedback.mfz-feedback-invalid {
-  color: var(--mfz-accent-red);
+  color: #FF2D2D;
 }
 
 .mfz-phone-feedback.mfz-feedback-validating {
-  color: var(--mfz-validating);
+  color: #F39C12;
 }
 
 .mfz-phone-feedback.mfz-feedback-idle {
@@ -309,9 +276,13 @@
    Mobile Responsive
    ======================================== */
 @media (max-width: 768px) {
-  :root {
-    --mfz-padding-x: 14px;
-    --mfz-padding-y: 10px;
+  .mfz-phone-container .iti__tel-input {
+    padding: 10px 14px;
+    padding-right: 44px;
+  }
+  
+  .mfz-phone-container .iti__selected-country {
+    padding: 0 6px 0 14px;
   }
   
   .mfz-phone-container .iti__dropdown-content {
@@ -327,23 +298,51 @@
    Dark Mode Support
    ======================================== */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --mfz-white: #1A1A1A;
-    --mfz-grey: #2A2A2A;
-    --mfz-border: #333333;
-    --mfz-black: #FFFFFF;
+  .mfz-phone-container .iti__tel-input {
+    background: #1A1A1A;
+    border-color: #333333;
+    color: #FFFFFF;
+  }
+  
+  .mfz-phone-container .iti__tel-input::placeholder {
+    color: #FFFFFF;
+  }
+  
+  .mfz-phone-container .iti__flag {
+    box-shadow: 0 0 0 0.5px #2A2A2A;
+  }
+  
+  .mfz-phone-container .iti--separate-dial-code .iti__selected-dial-code {
+    color: #FFFFFF;
   }
   
   .mfz-phone-container .iti__arrow {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   }
   
-  .mfz-phone-container.mfz-valid::after {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2306603A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+  .mfz-phone-container .iti__dropdown-content {
+    background: #1A1A1A;
+    border-color: #333333;
   }
   
-  .mfz-phone-container.mfz-invalid::after {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23FF2D2D' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18'/%3E%3Cpath d='m6 6 12 12'/%3E%3C/svg%3E");
+  .mfz-phone-container .iti__search-input {
+    background: #1A1A1A;
+    border-color: #333333;
+    color: #FFFFFF;
+  }
+  
+  .mfz-phone-container .iti__search-input::placeholder {
+    color: #FFFFFF;
+  }
+  
+  .mfz-phone-container .iti__country:hover,
+  .mfz-phone-container .iti__country--highlight {
+    background-color: #2A2A2A;
+  }
+  
+  .mfz-phone-container .iti__country-name,
+  .mfz-phone-container .iti__dial-code {
+    color: #FFFFFF;
   }
 }
 
@@ -374,5 +373,5 @@
 }
 
 [dir="rtl"] .mfz-phone-container .iti__selected-country {
-  padding: 0 var(--mfz-padding-x) 0 var(--mfz-gap);
+  padding: 0 16px 0 6px;
 }
