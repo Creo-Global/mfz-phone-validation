@@ -23,7 +23,7 @@ Go to **Site Settings → Custom Code → Head Code** and add:
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/css/intlTelInput.css">
 
 <!-- MFZ Phone CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/YOUR_USERNAME/creo-validation-api@main/webflow-integration/mfz-phone.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Creo-Global/mfz-phone-validation@main/mfz-phone.css">
 ```
 
 ### Step 2: Add Scripts to Footer
@@ -35,7 +35,7 @@ Go to **Site Settings → Custom Code → Footer Code** and add:
 <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/intlTelInput.min.js"></script>
 
 <!-- MFZ Phone Library -->
-<script src="https://cdn.jsdelivr.net/gh/YOUR_USERNAME/creo-validation-api@main/webflow-integration/mfz-phone.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Creo-Global/mfz-phone-validation@main/mfz-phone.js"></script>
 ```
 
 ### Step 3: Add Attribute to Phone Inputs
