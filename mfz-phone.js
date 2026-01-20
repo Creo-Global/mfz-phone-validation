@@ -429,6 +429,17 @@
   };
 
   /**
+   * Remove validation feedback element
+   * @param {HTMLElement} container - Container element
+   */
+  const removeFeedbackElement = (container) => {
+    const feedback = container.querySelector('.mfz-phone-feedback');
+    if (feedback) {
+      feedback.remove();
+    }
+  };
+
+  /**
    * Update validation state
    * @param {HTMLElement} input - Phone input element
    * @param {string} state - State: 'valid', 'invalid', 'validating', 'idle'
@@ -439,19 +450,23 @@
     if (!instance) return;
 
     const container = instance.container;
-    const feedback = createFeedbackElement(container);
 
     // Remove all state classes
     container.classList.remove('mfz-valid', 'mfz-invalid', 'mfz-validating');
     
-    // Add current state class
-    if (state !== 'idle') {
+    // Handle idle state - remove feedback element entirely
+    if (state === 'idle' || (state === 'valid' && !message)) {
+      removeFeedbackElement(container);
+      if (state === 'valid') {
+        container.classList.add('mfz-valid');
+      }
+    } else {
+      // Add current state class and show feedback
       container.classList.add(`mfz-${state}`);
+      const feedback = createFeedbackElement(container);
+      feedback.textContent = message;
+      feedback.className = `mfz-phone-feedback mfz-feedback-${state}`;
     }
-
-    // Update feedback message
-    feedback.textContent = message;
-    feedback.className = `mfz-phone-feedback mfz-feedback-${state}`;
 
     // Store validation state
     instance.isValid = state === 'valid';
@@ -461,8 +476,9 @@
   /**
    * Handle phone validation
    * @param {HTMLElement} input - Phone input element
+   * @param {boolean} isBlur - Whether this was triggered by blur event
    */
-  const handleValidation = async (input) => {
+  const handleValidation = async (input, isBlur = false) => {
     const instance = phoneInstances.get(input);
     if (!instance || !instance.iti) return;
 
@@ -474,6 +490,7 @@
     // Check if empty
     if (!digitsOnly) {
       updateValidationState(input, 'idle', '');
+      instance.hasBlurred = isBlur; // Track if user has left the field
       return;
     }
 
@@ -482,10 +499,20 @@
     
     // Check minimum length - don't call API if too short
     if (digitsOnly.length < limits.min) {
-      updateValidationState(input, 'invalid', `Minimum ${limits.min} digits required`);
+      // Only show error if user has blurred OR has previously blurred
+      if (isBlur || instance.hasBlurred) {
+        updateValidationState(input, 'invalid', `Minimum ${limits.min} digits required`);
+      } else {
+        // While typing, just stay idle until min length reached
+        updateValidationState(input, 'idle', '');
+      }
       instance.formattedNumber = null;
+      if (isBlur) instance.hasBlurred = true;
       return;
     }
+
+    // Mark that we've reached min length at least once
+    instance.hasBlurred = true;
 
     // Get the full number - use getNumber if available, otherwise construct it
     let phone;
@@ -553,21 +580,22 @@
       iti,
       isValid: false,
       validationState: 'idle',
-      formattedNumber: null
+      formattedNumber: null,
+      hasBlurred: false // Track if user has left the field at least once
     };
     phoneInstances.set(input, instance);
 
     // Setup strict input filtering (numbers only, max length per country)
     setupStrictInput(input, instance);
 
-    // Create debounced validation handler
-    const debouncedValidation = debounce(() => handleValidation(input), CONFIG.debounceMs);
+    // Create debounced validation handler (not blur)
+    const debouncedValidation = debounce(() => handleValidation(input, false), CONFIG.debounceMs);
 
     // Validation on input (debounced) - runs after strict input filtering
     input.addEventListener('input', debouncedValidation);
     
-    // Validation on blur (immediate)
-    input.addEventListener('blur', () => handleValidation(input));
+    // Validation on blur (immediate, with blur flag)
+    input.addEventListener('blur', () => handleValidation(input, true));
     
     // Validation on country change
     input.addEventListener('countrychange', () => {
