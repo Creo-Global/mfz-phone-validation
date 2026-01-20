@@ -295,58 +295,6 @@
 }
 
 /* ========================================
-   Dark Mode Support
-   ======================================== */
-@media (prefers-color-scheme: dark) {
-  .mfz-phone-container .iti__tel-input {
-    background: #1A1A1A;
-    border-color: #333333;
-    color: #FFFFFF;
-  }
-  
-  .mfz-phone-container .iti__tel-input::placeholder {
-    color: #FFFFFF;
-  }
-  
-  .mfz-phone-container .iti__flag {
-    box-shadow: 0 0 0 0.5px #2A2A2A;
-  }
-  
-  .mfz-phone-container .iti--separate-dial-code .iti__selected-dial-code {
-    color: #FFFFFF;
-  }
-  
-  .mfz-phone-container .iti__arrow {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  }
-  
-  .mfz-phone-container .iti__dropdown-content {
-    background: #1A1A1A;
-    border-color: #333333;
-  }
-  
-  .mfz-phone-container .iti__search-input {
-    background: #1A1A1A;
-    border-color: #333333;
-    color: #FFFFFF;
-  }
-  
-  .mfz-phone-container .iti__search-input::placeholder {
-    color: #FFFFFF;
-  }
-  
-  .mfz-phone-container .iti__country:hover,
-  .mfz-phone-container .iti__country--highlight {
-    background-color: #2A2A2A;
-  }
-  
-  .mfz-phone-container .iti__country-name,
-  .mfz-phone-container .iti__dial-code {
-    color: #FFFFFF;
-  }
-}
-
-/* ========================================
    Webflow Integration
    ======================================== */
 .w-form .mfz-phone-container {
