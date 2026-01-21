@@ -625,25 +625,7 @@
         const instance = phoneInstances.get(input);
         if (!instance) return;
 
-        const phone = instance.iti.getNumber();
-        const isEmpty = !phone || phone.trim() === '' || phone === `+${instance.iti.getSelectedCountryData().dialCode}`;
-
-        // Check required
-        if (instance.isRequired && isEmpty) {
-          updateValidationState(input, 'invalid', CONFIG.validationMessages.required);
-          hasInvalidPhone = true;
-          return;
-        }
-
-        // Check validation state
-        if (!isEmpty && !instance.isValid) {
-          hasInvalidPhone = true;
-          if (instance.validationState === 'idle') {
-            updateValidationState(input, 'invalid', CONFIG.validationMessages.invalid);
-          }
-        }
-
-        // Update hidden input with formatted number if valid
+        // If already validated as valid, add hidden input and allow
         if (instance.isValid && instance.formattedNumber) {
           // Create or update hidden input for formatted number
           let hiddenInput = form.querySelector(`input[name="${input.name}_formatted"]`);
@@ -654,6 +636,27 @@
             form.appendChild(hiddenInput);
           }
           hiddenInput.value = instance.formattedNumber;
+          return; // This phone is valid, continue to next
+        }
+
+        // Check if input has a value
+        const rawValue = input.value.trim();
+        const digitsOnly = rawValue.replace(/\D/g, '');
+        const isEmpty = !digitsOnly;
+
+        // Check required - only if not already valid
+        if (instance.isRequired && isEmpty) {
+          updateValidationState(input, 'invalid', CONFIG.validationMessages.required);
+          hasInvalidPhone = true;
+          return;
+        }
+
+        // Check validation state - if has value but not valid
+        if (!isEmpty && !instance.isValid) {
+          hasInvalidPhone = true;
+          if (instance.validationState === 'idle') {
+            updateValidationState(input, 'invalid', CONFIG.validationMessages.invalid);
+          }
         }
       });
 
