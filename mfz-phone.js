@@ -625,17 +625,9 @@
         const instance = phoneInstances.get(input);
         if (!instance) return;
 
-        // If already validated as valid, add hidden input and allow
         if (instance.isValid && instance.formattedNumber) {
-          // Create or update hidden input for formatted number
-          let hiddenInput = form.querySelector(`input[name="${input.name}_formatted"]`);
-          if (!hiddenInput) {
-            hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.name = `${input.name}_formatted`;
-            form.appendChild(hiddenInput);
-          }
-          hiddenInput.value = instance.formattedNumber;
+          // Set the input value to the E.164 formatted number for submission
+          input.value = instance.formattedNumber;
           return; // This phone is valid, continue to next
         }
 
