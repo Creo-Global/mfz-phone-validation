@@ -570,12 +570,10 @@
       separateDialCode: true,
       nationalMode: false,
       autoPlaceholder: 'aggressive',
+      autoComplete: 'tel',
       formatOnDisplay: true,
       utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/utils.js'
     });
-
-    // Override intl-tel-input's autocomplete="off" to enable browser autofill
-    input.setAttribute('autocomplete', 'tel');
 
     // Store instance
     const instance = {
