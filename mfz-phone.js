@@ -585,11 +585,8 @@
     };
     phoneInstances.set(input, instance);
 
-    // Allow browser autocomplete for phone (override intl-tel-input if it set autocomplete="off")
-    const autocomplete = input.getAttribute('autocomplete');
-    if (autocomplete !== 'off') {
-      input.setAttribute('autocomplete', autocomplete || 'tel');
-    }
+    // Enable browser autocomplete for all phone inputs
+    input.setAttribute('autocomplete', 'tel');
 
     // Setup strict input filtering (numbers only, max length per country)
     setupStrictInput(input, instance);
