@@ -585,8 +585,18 @@
     };
     phoneInstances.set(input, instance);
 
-    // Enable browser autocomplete for all phone inputs
-    input.setAttribute('autocomplete', 'tel');
+    // Enable browser autocomplete for all phone inputs (Webflow and others may set form/input to off)
+    const applyAutocomplete = () => {
+      input.setAttribute('autocomplete', 'tel');
+    };
+    applyAutocomplete();
+    input.addEventListener('focus', applyAutocomplete);
+
+    // If form has autocomplete="off", enable it so phone field can autocomplete (e.g. Webflow)
+    const form = input.closest('form');
+    if (form && form.getAttribute('autocomplete') === 'off') {
+      form.setAttribute('autocomplete', 'on');
+    }
 
     // Setup strict input filtering (numbers only, max length per country)
     setupStrictInput(input, instance);
