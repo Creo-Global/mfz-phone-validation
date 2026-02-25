@@ -576,10 +576,10 @@
 
     // Force autocomplete="tel" and prevent intl-tel-input / Webflow from resetting it.
     // The library sets autocomplete="off" both during init and async when utils.js loads.
-    input.setAttribute('autocomplete', 'tel');
+    input.setAttribute('autocomplete', 'on');
     const acObserver = new MutationObserver(() => {
-      if (input.getAttribute('autocomplete') !== 'tel') {
-        input.setAttribute('autocomplete', 'tel');
+      if (input.getAttribute('autocomplete') !== 'on') {
+        input.setAttribute('autocomplete', 'on');
       }
     });
     acObserver.observe(input, { attributes: true, attributeFilter: ['autocomplete'] });
