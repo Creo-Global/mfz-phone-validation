@@ -574,20 +574,15 @@
       utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/utils.js'
     });
 
-    // Force autocomplete="on" and prevent intl-tel-input / Webflow from resetting it.
+    // Force autocomplete="tel" and prevent intl-tel-input / Webflow from resetting it.
     // The library sets autocomplete="off" both during init and async when utils.js loads.
-    console.log('[MFZ Phone] Current autocomplete before override:', input.getAttribute('autocomplete'));
-    input.setAttribute('autocomplete', 'on');
-    console.log('[MFZ Phone] Set autocomplete to "on" for input:', input.name || input.id);
+    input.setAttribute('autocomplete', 'tel');
     const acObserver = new MutationObserver(() => {
-      const current = input.getAttribute('autocomplete');
-      if (current !== 'on') {
-        console.log('[MFZ Phone] Autocomplete was changed to "' + current + '", resetting to "on"');
-        input.setAttribute('autocomplete', 'on');
+      if (input.getAttribute('autocomplete') !== 'tel') {
+        input.setAttribute('autocomplete', 'tel');
       }
     });
     acObserver.observe(input, { attributes: true, attributeFilter: ['autocomplete'] });
-    console.log('[MFZ Phone] MutationObserver active for autocomplete on input:', input.name || input.id);
 
     // Store instance
     const instance = {
