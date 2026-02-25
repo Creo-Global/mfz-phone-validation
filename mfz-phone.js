@@ -570,10 +570,19 @@
       separateDialCode: true,
       nationalMode: false,
       autoPlaceholder: 'aggressive',
-      autoComplete: 'tel',
       formatOnDisplay: true,
       utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/utils.js'
     });
+
+    // Force autocomplete="tel" and prevent intl-tel-input / Webflow from resetting it.
+    // The library sets autocomplete="off" both during init and async when utils.js loads.
+    input.setAttribute('autocomplete', 'tel');
+    const acObserver = new MutationObserver(() => {
+      if (input.getAttribute('autocomplete') !== 'tel') {
+        input.setAttribute('autocomplete', 'tel');
+      }
+    });
+    acObserver.observe(input, { attributes: true, attributeFilter: ['autocomplete'] });
 
     // Store instance
     const instance = {
