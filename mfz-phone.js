@@ -556,6 +556,7 @@
     // Mark as initialized
     input.setAttribute('data-mfz-initialized', 'true');
 
+
     // Create wrapper container
     const container = document.createElement('div');
     container.className = 'mfz-phone-container';
@@ -573,6 +574,9 @@
       utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/utils.js'
     });
 
+    // Override intl-tel-input's autocomplete="off" to enable browser autofill
+    input.setAttribute('autocomplete', 'tel');
+
     // Store instance
     const instance = {
       input,
@@ -584,19 +588,6 @@
       hasBlurred: false // Track if user has left the field at least once
     };
     phoneInstances.set(input, instance);
-
-    // Enable browser autocomplete for all phone inputs (Webflow and others may set form/input to off)
-    const applyAutocomplete = () => {
-      input.setAttribute('autocomplete', 'tel');
-    };
-    applyAutocomplete();
-    input.addEventListener('focus', applyAutocomplete);
-
-    // If form has autocomplete="off", enable it so phone field can autocomplete (e.g. Webflow)
-    const form = input.closest('form');
-    if (form && form.getAttribute('autocomplete') === 'off') {
-      form.setAttribute('autocomplete', 'on');
-    }
 
     // Setup strict input filtering (numbers only, max length per country)
     setupStrictInput(input, instance);
