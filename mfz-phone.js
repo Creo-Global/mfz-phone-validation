@@ -238,6 +238,29 @@
    * @param {object} instance - Phone instance
    */
   const setupStrictInput = (input, instance) => {
+    // HELPER: Strip country code and leading zero from any input value
+    const stripPrefixes = (value) => {
+      const countryData = instance.iti.getSelectedCountryData();
+      const dialCode = countryData.dialCode;
+      let val = value.trim().replace(/\s/g, '');
+
+      // Scenario 1: +971507489482
+      if (val.startsWith('+' + dialCode)) {
+        val = val.slice(('+' + dialCode).length);
+      }  
+      // Scenario 2: 00971507489482
+      else if (val.startsWith('00' + dialCode)) {
+        val = val.slice(('00' + dialCode).length);
+      }
+      // Scenario 3: 971507489482 (without + but long enough to confirm it's a full number)
+      else if (val.startsWith(dialCode) && val.length > dialCode.length + 6) {
+        val = val.slice(dialCode.length);
+      }
+      // Scenario 4: Always strip leading zero e.g. 0507489482 to 507489482
+        val = val.replace(/^0+/, '');
+      return val;
+    };
+
     // Prevent non-numeric key presses
     input.addEventListener('keydown', (e) => {
       // Allow: backspace, delete, tab, escape, enter, arrows
@@ -247,14 +270,10 @@
         'Home', 'End'
       ];
       
-      if (allowedKeys.includes(e.key)) {
-        return;
-      }
+      if (allowedKeys.includes(e.key)) return;
       
       // Allow Ctrl/Cmd + A, C, V, X
-      if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) {
-        return;
-      }
+      if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) return;
       
       // Block if not a digit
       if (!/^\d$/.test(e.key)) {
@@ -277,7 +296,8 @@
       e.preventDefault();
       
       const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-      const digitsOnly = filterToDigits(pastedText);
+      const stripped = stripPrefixes(pastedText);
+      const digitsOnly = filterToDigits(stripped);
       
       const countryData = instance.iti.getSelectedCountryData();
       const maxLength = getMaxPhoneLength(countryData.iso2);
@@ -307,7 +327,8 @@
       const maxLength = getMaxPhoneLength(countryData.iso2);
       
       // Get only digits
-      let digitsOnly = filterToDigits(input.value);
+      const stripped = stripPrefixes(input.value);
+      let digitsOnly = filterToDigits(stripped);
       
       // Enforce max length
       if (digitsOnly.length > maxLength) {
