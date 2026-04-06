@@ -5,7 +5,7 @@
  * <input type="tel" data-mfz-phone name="phone">
  * 
  * @version 1.0.0
- * @author Creo Global
+
  */
 
 (function() {
@@ -13,7 +13,7 @@
 
   // Configuration
   const CONFIG = {
-    apiBaseUrl: 'https://api.creoglobal.co',
+    apiBaseUrl: 'https://api.meydanfz.ae',
     defaultCountry: 'ae', // UAE as fallback
     sessionStorageKey: 'mfz_detected_country',
     debounceMs: 300,
