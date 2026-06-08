@@ -127,7 +127,7 @@
     pg: { min: 4, max: 11 },  // Papua New Guinea
     
     // Africa
-    eg: { min: 7, max: 9 },   // Egypt
+    eg: { min: 7, max: 10 },   // Egypt
     za: { min: 9, max: 9 },   // South Africa
     ng: { min: 7, max: 10 },  // Nigeria
     ke: { min: 6, max: 10 },  // Kenya
