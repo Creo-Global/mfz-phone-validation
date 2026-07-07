@@ -13,14 +13,16 @@
 
   // Configuration
   const CONFIG = {
-    apiBaseUrl: 'https://api.meydanfz.ae',
+    apiBaseUrl: 'https://apiphone.meydanfz.ae',
     defaultCountry: 'ae', // UAE as fallback
     sessionStorageKey: 'mfz_detected_country',
+    ipInfoStorageKey: 'mfz_ip_location_info',
     debounceMs: 300,
     validationMessages: {
       invalid: 'Please enter a valid phone number',
       required: 'Phone number is required',
-      validating: 'Validating...'
+      validating: 'Validating...',
+      rateLimited: 'Too many attempts, try again shortly'
     }
   };
 
@@ -194,6 +196,7 @@
 
   // Store for phone input instances
   const phoneInstances = new Map();
+  const phoneValidationCache = new Map();
 
   /**
    * Get phone length limits for a country
@@ -370,7 +373,19 @@
    * @returns {Promise<string>} Country code (lowercase)
    */
   const detectCountry = async () => {
-    // Check session storage first
+    try {
+      const cachedInfo = sessionStorage.getItem(CONFIG.ipInfoStorageKey);
+      if (cachedInfo) {
+        const parsed = JSON.parse(cachedInfo);
+        if (parsed && parsed.country_code) {
+          sessionStorage.setItem(CONFIG.sessionStorageKey, parsed.country_code.toLowerCase());
+          return parsed.country_code.toLowerCase();
+        }
+      }
+    } catch (error) {
+      // Ignore invalid cache and fetch fresh data
+    }
+
     const cached = sessionStorage.getItem(CONFIG.sessionStorageKey);
     if (cached) {
       return cached.toLowerCase();
@@ -383,8 +398,8 @@
       const data = await response.json();
       const countryCode = (data.country_code || CONFIG.defaultCountry).toLowerCase();
       
-      // Cache in session storage
       sessionStorage.setItem(CONFIG.sessionStorageKey, countryCode);
+      sessionStorage.setItem(CONFIG.ipInfoStorageKey, JSON.stringify(data));
       
       return countryCode;
     } catch (error) {
@@ -399,6 +414,11 @@
    * @returns {Promise<object>} Validation result
    */
   const validatePhoneNumber = async (phone, countryCode) => {
+    const cacheKey = `${countryCode.toUpperCase()}:${phone}`;
+    if (phoneValidationCache.has(cacheKey)) {
+      return phoneValidationCache.get(cacheKey);
+    }
+
     try {
       const params = new URLSearchParams({
         phone: phone,
@@ -406,9 +426,21 @@
       });
       
       const response = await fetch(`${CONFIG.apiBaseUrl}/phone/validate?${params}`);
+
+      if (response.status === 429) {
+        return {
+          success: false,
+          valid: false,
+          rateLimited: true,
+          error: CONFIG.validationMessages.rateLimited
+        };
+      }
+
       if (!response.ok) throw new Error('Validation request failed');
       
-      return await response.json();
+      const result = await response.json();
+      phoneValidationCache.set(cacheKey, result);
+      return result;
     } catch (error) {
       return { success: false, valid: false, error: error.message };
     }
@@ -492,6 +524,7 @@
     // Store validation state
     instance.isValid = state === 'valid';
     instance.validationState = state;
+    instance.validationMessage = message;
   };
 
   /**
@@ -555,6 +588,15 @@
     // Call validation API
     const result = await validatePhoneNumber(phone, countryData.iso2);
 
+    if (result.rateLimited) {
+      instance.rateLimited = true;
+      updateValidationState(input, 'invalid', result.error || CONFIG.validationMessages.rateLimited);
+      instance.formattedNumber = null;
+      return;
+    }
+
+    instance.rateLimited = false;
+
     if (result.valid) {
       updateValidationState(input, 'valid', '');
       // Store formatted number
@@ -613,7 +655,8 @@
       isValid: false,
       validationState: 'idle',
       formattedNumber: null,
-      hasBlurred: false // Track if user has left the field at least once
+      hasBlurred: false, // Track if user has left the field at least once
+      rateLimited: false
     };
     phoneInstances.set(input, instance);
 
