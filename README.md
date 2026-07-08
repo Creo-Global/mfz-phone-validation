@@ -80,9 +80,12 @@ The default configuration:
 
 | Setting | Default | Description |
 |---------|---------|-------------|
+| Primary API | `https://apiphone.meydanfz.ae` | Dedicated phone validation API |
+| Fallback API | `https://api.meydanfz.ae` | Used when primary is slow, rate-limited, or unavailable |
+| API timeout | 5000ms | Slow responses trigger fallback |
 | Default Country | UAE (AE) | Fallback if IP detection fails |
 | Debounce | 300ms | Delay before validating |
-| Caching | sessionStorage | Country cached per session |
+| Caching | sessionStorage | Country and active API cached per session |
 
 ## Validation States
 
@@ -137,8 +140,9 @@ This ensures you receive a standardized phone number format in your form submiss
 
 ### Validation not working
 
-1. Ensure the API endpoint is accessible: `https://api.creoglobal.co/phone/validate`
+1. Ensure the API endpoint is accessible: `https://apiphone.meydanfz.ae/phone/validate` (falls back to `https://api.meydanfz.ae` automatically)
 2. Check browser console for CORS or network errors
+3. If both APIs are down, the form still submits using local phone validation when the number looks valid
 
 ### Country not detected correctly
 
@@ -156,10 +160,13 @@ This ensures you receive a standardized phone number format in your form submiss
 
 ## API Endpoints
 
-This library uses the following API endpoints:
+This library uses the following API endpoints (primary with automatic fallback):
 
-- **IP Detection**: `GET https://api.creoglobal.co/ip`
-- **Phone Validation**: `GET https://api.creoglobal.co/phone/validate?phone={phone}&countryCode={code}`
+- **Primary**: `https://apiphone.meydanfz.ae`
+- **Fallback**: `https://api.meydanfz.ae` (used on timeout, HTTP 429, or 5xx errors)
+
+- **IP Detection**: `GET /ip`
+- **Phone Validation**: `GET /phone/validate?phone={phone}&countryCode={code}`
 
 ## License
 

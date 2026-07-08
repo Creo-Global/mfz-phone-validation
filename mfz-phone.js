@@ -14,6 +14,9 @@
   // Configuration
   const CONFIG = {
     apiBaseUrl: 'https://apiphone.meydanfz.ae',
+    apiFallbackUrl: 'https://api.meydanfz.ae',
+    apiTimeoutMs: 8000,
+    activeApiStorageKey: 'mfz_active_api_base',
     defaultCountry: 'ae', // UAE as fallback
     sessionStorageKey: 'mfz_detected_country',
     ipInfoStorageKey: 'mfz_ip_location_info',
@@ -197,6 +200,173 @@
   // Store for phone input instances
   const phoneInstances = new Map();
   const phoneValidationCache = new Map();
+  let activeApiBaseUrl = null;
+
+  /**
+   * Get the preferred API base URL (cached in memory/session when fallback was used)
+   * @returns {string}
+   */
+  const getPreferredApiBaseUrl = () => {
+    if (activeApiBaseUrl) return activeApiBaseUrl;
+
+    try {
+      const stored = sessionStorage.getItem(CONFIG.activeApiStorageKey);
+      if (stored) {
+        activeApiBaseUrl = stored;
+        return stored;
+      }
+    } catch (error) {
+      // sessionStorage unavailable
+    }
+
+    return CONFIG.apiBaseUrl;
+  };
+
+  /**
+   * Remember which API base responded successfully this session
+   * @param {string} url
+   */
+  const setActiveApiBaseUrl = (url) => {
+    activeApiBaseUrl = url;
+    try {
+      sessionStorage.setItem(CONFIG.activeApiStorageKey, url);
+    } catch (error) {
+      // sessionStorage unavailable
+    }
+  };
+
+  /**
+   * Whether a failed response should trigger the fallback API
+   * @param {Response} response
+   * @returns {boolean}
+   */
+  const shouldTryFallback = (response) => {
+    return response.status === 429 || response.status >= 500;
+  };
+
+  /**
+   * Fetch with timeout (AbortController)
+   * @param {string} url
+   * @param {number} timeoutMs
+   * @returns {Promise<Response>}
+   */
+  const fetchWithTimeout = async (url, timeoutMs) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      return await fetch(url, { signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+
+  /**
+   * Fetch from API with automatic fallback on timeout, rate limit, or server errors
+   * @param {string} path - API path including query string (e.g. "/ip" or "/phone/validate?...")
+   * @returns {Promise<Response>}
+   */
+  const fetchApi = async (path) => {
+    const preferred = getPreferredApiBaseUrl();
+    const bases = [CONFIG.apiBaseUrl];
+
+    if (CONFIG.apiFallbackUrl && CONFIG.apiFallbackUrl !== CONFIG.apiBaseUrl) {
+      if (preferred === CONFIG.apiFallbackUrl) {
+        bases.length = 0;
+        bases.push(CONFIG.apiFallbackUrl, CONFIG.apiBaseUrl);
+      } else {
+        bases.push(CONFIG.apiFallbackUrl);
+      }
+    }
+
+    let lastError;
+
+    for (let i = 0; i < bases.length; i++) {
+      const base = bases[i];
+      const url = `${base}${path}`;
+
+      try {
+        const response = await fetchWithTimeout(url, CONFIG.apiTimeoutMs);
+
+        if (shouldTryFallback(response) && i < bases.length - 1) {
+          continue;
+        }
+
+        if (response.ok) {
+          setActiveApiBaseUrl(base);
+        }
+
+        return response;
+      } catch (error) {
+        lastError = error;
+        if (i < bases.length - 1) {
+          continue;
+        }
+      }
+    }
+
+    throw lastError || new Error('API request failed');
+  };
+
+  /**
+   * Build E.164 phone string from input
+   * @param {object} instance - Phone instance
+   * @param {string} digitsOnly - National number digits
+   * @returns {string}
+   */
+  const getPhoneE164 = (instance, digitsOnly) => {
+    const countryData = instance.iti.getSelectedCountryData();
+    let phone;
+
+    try {
+      phone = instance.iti.getNumber();
+    } catch (error) {
+      phone = null;
+    }
+
+    if (!phone || phone === `+${countryData.dialCode}`) {
+      phone = `+${countryData.dialCode}${digitsOnly}`;
+    }
+
+    return phone;
+  };
+
+  /**
+   * Validate phone locally via intl-tel-input (no API)
+   * @param {object} instance - Phone instance
+   * @param {string} digitsOnly - National number digits
+   * @param {object} options
+   * @param {boolean} options.allowDegraded - Allow length-only check when API/utils unavailable
+   * @returns {object}
+   */
+  const validatePhoneLocally = (instance, digitsOnly, { allowDegraded = false } = {}) => {
+    if (!instance?.iti || !digitsOnly) {
+      return { valid: false, formatted: null };
+    }
+
+    const countryData = instance.iti.getSelectedCountryData();
+    const limits = getPhoneLengthLimits(countryData.iso2);
+
+    if (digitsOnly.length < limits.min || digitsOnly.length > limits.max) {
+      return { valid: false, formatted: null };
+    }
+
+    const phone = getPhoneE164(instance, digitsOnly);
+
+    try {
+      if (typeof window.intlTelInputUtils !== 'undefined' && instance.iti.isValidNumber()) {
+        return { valid: true, formatted: phone, localFallback: true };
+      }
+    } catch (error) {
+      // Utils not ready
+    }
+
+    if (allowDegraded) {
+      return { valid: true, formatted: phone, localFallback: true, degraded: true };
+    }
+
+    return { valid: false, formatted: null };
+  };
 
   /**
    * Get phone length limits for a country
@@ -392,7 +562,7 @@
     }
 
     try {
-      const response = await fetch(`${CONFIG.apiBaseUrl}/ip`);
+      const response = await fetchApi('/ip');
       if (!response.ok) throw new Error('IP detection failed');
       
       const data = await response.json();
@@ -408,41 +578,72 @@
   };
 
   /**
-   * Validate phone number via API
+   * Validate phone number via API, with local fallback when API is unavailable
    * @param {string} phone - Phone number
    * @param {string} countryCode - ISO country code
+   * @param {object} instance - Phone instance (for local fallback)
+   * @param {string} digitsOnly - National number digits
    * @returns {Promise<object>} Validation result
    */
-  const validatePhoneNumber = async (phone, countryCode) => {
+  const validatePhoneNumber = async (phone, countryCode, instance = null, digitsOnly = null) => {
     const cacheKey = `${countryCode.toUpperCase()}:${phone}`;
     if (phoneValidationCache.has(cacheKey)) {
       return phoneValidationCache.get(cacheKey);
     }
+
+    const tryLocalFallback = () => {
+      if (!instance) return null;
+      const digits = digitsOnly || filterToDigits(phone);
+      const local = validatePhoneLocally(instance, digits);
+      if (!local.valid) return null;
+      return {
+        success: true,
+        valid: true,
+        formatted: { e164: local.formatted },
+        localFallback: true
+      };
+    };
 
     try {
       const params = new URLSearchParams({
         phone: phone,
         countryCode: countryCode.toUpperCase()
       });
-      
-      const response = await fetch(`${CONFIG.apiBaseUrl}/phone/validate?${params}`);
+
+      const response = await fetchApi(`/phone/validate?${params}`);
 
       if (response.status === 429) {
+        const local = tryLocalFallback();
+        if (local) {
+          phoneValidationCache.set(cacheKey, local);
+          return local;
+        }
         return {
           success: false,
           valid: false,
           rateLimited: true,
+          apiUnavailable: true,
           error: CONFIG.validationMessages.rateLimited
         };
       }
 
       if (!response.ok) throw new Error('Validation request failed');
-      
+
       const result = await response.json();
       phoneValidationCache.set(cacheKey, result);
       return result;
     } catch (error) {
-      return { success: false, valid: false, error: error.message };
+      const local = tryLocalFallback();
+      if (local) {
+        phoneValidationCache.set(cacheKey, local);
+        return local;
+      }
+      return {
+        success: false,
+        valid: false,
+        apiUnavailable: true,
+        error: error.message
+      };
     }
   };
 
@@ -586,7 +787,9 @@
     updateValidationState(input, 'validating', '');
 
     // Call validation API
-    const result = await validatePhoneNumber(phone, countryData.iso2);
+    const result = await validatePhoneNumber(phone, countryData.iso2, instance, digitsOnly);
+
+    instance.apiUnavailable = !!result.apiUnavailable;
 
     if (result.rateLimited) {
       instance.rateLimited = true;
@@ -599,12 +802,62 @@
 
     if (result.valid) {
       updateValidationState(input, 'valid', '');
-      // Store formatted number
       instance.formattedNumber = result.formatted?.e164 || phone;
+    } else if (result.apiUnavailable) {
+      // API down and local check inconclusive — stay neutral so submit can retry locally
+      updateValidationState(input, 'idle', '');
+      instance.formattedNumber = null;
     } else {
       updateValidationState(input, 'invalid', CONFIG.validationMessages.invalid);
       instance.formattedNumber = null;
     }
+  };
+
+  /**
+   * Resolve phone for form submit without waiting on API
+   * @param {HTMLElement} input - Phone input element
+   * @param {object} instance - Phone instance
+   * @returns {boolean} Whether this phone is OK to submit
+   */
+  const preparePhoneForSubmit = (input, instance) => {
+    const digitsOnly = filterToDigits(input.value.trim());
+    const isEmpty = !digitsOnly;
+
+    if (isEmpty) {
+      if (instance.isRequired) {
+        updateValidationState(input, 'invalid', CONFIG.validationMessages.required);
+        return false;
+      }
+      return true;
+    }
+
+    if (instance.isValid && instance.formattedNumber) {
+      input.value = instance.formattedNumber;
+      return true;
+    }
+
+    const limits = getPhoneLengthLimits(instance.iti.getSelectedCountryData().iso2);
+    if (digitsOnly.length < limits.min) {
+      updateValidationState(input, 'invalid', CONFIG.validationMessages.invalid);
+      return false;
+    }
+
+    const allowDegraded = instance.validationState === 'validating'
+      || instance.apiUnavailable
+      || instance.rateLimited;
+
+    const local = validatePhoneLocally(instance, digitsOnly, { allowDegraded });
+
+    if (local.valid) {
+      input.value = local.formatted;
+      instance.formattedNumber = local.formatted;
+      instance.isValid = true;
+      updateValidationState(input, 'valid', '');
+      return true;
+    }
+
+    updateValidationState(input, 'invalid', CONFIG.validationMessages.invalid);
+    return false;
   };
 
   /**
@@ -656,7 +909,8 @@
       validationState: 'idle',
       formattedNumber: null,
       hasBlurred: false, // Track if user has left the field at least once
-      rateLimited: false
+      rateLimited: false,
+      apiUnavailable: false
     };
     phoneInstances.set(input, instance);
 
@@ -700,30 +954,8 @@
         const instance = phoneInstances.get(input);
         if (!instance) return;
 
-        if (instance.isValid && instance.formattedNumber) {
-          // Set the input value to the E.164 formatted number for submission
-          input.value = instance.formattedNumber;
-          return; // This phone is valid, continue to next
-        }
-
-        // Check if input has a value
-        const rawValue = input.value.trim();
-        const digitsOnly = rawValue.replace(/\D/g, '');
-        const isEmpty = !digitsOnly;
-
-        // Check required - only if not already valid
-        if (instance.isRequired && isEmpty) {
-          updateValidationState(input, 'invalid', CONFIG.validationMessages.required);
+        if (!preparePhoneForSubmit(input, instance)) {
           hasInvalidPhone = true;
-          return;
-        }
-
-        // Check validation state - if has value but not valid
-        if (!isEmpty && !instance.isValid) {
-          hasInvalidPhone = true;
-          if (instance.validationState === 'idle') {
-            updateValidationState(input, 'invalid', CONFIG.validationMessages.invalid);
-          }
         }
       });
 
