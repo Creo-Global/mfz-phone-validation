@@ -16,7 +16,6 @@
     apiBaseUrl: 'https://apiphone.meydanfz.ae',
     apiFallbackUrl: 'https://api.meydanfz.ae',
     apiTimeoutMs: 8000,
-    activeApiStorageKey: 'mfz_active_api_base',
     defaultCountry: 'ae', // UAE as fallback
     sessionStorageKey: 'mfz_detected_country',
     ipInfoStorageKey: 'mfz_ip_location_info',
@@ -200,40 +199,6 @@
   // Store for phone input instances
   const phoneInstances = new Map();
   const phoneValidationCache = new Map();
-  let activeApiBaseUrl = null;
-
-  /**
-   * Get the preferred API base URL (cached in memory/session when fallback was used)
-   * @returns {string}
-   */
-  const getPreferredApiBaseUrl = () => {
-    if (activeApiBaseUrl) return activeApiBaseUrl;
-
-    try {
-      const stored = sessionStorage.getItem(CONFIG.activeApiStorageKey);
-      if (stored) {
-        activeApiBaseUrl = stored;
-        return stored;
-      }
-    } catch (error) {
-      // sessionStorage unavailable
-    }
-
-    return CONFIG.apiBaseUrl;
-  };
-
-  /**
-   * Remember which API base responded successfully this session
-   * @param {string} url
-   */
-  const setActiveApiBaseUrl = (url) => {
-    activeApiBaseUrl = url;
-    try {
-      sessionStorage.setItem(CONFIG.activeApiStorageKey, url);
-    } catch (error) {
-      // sessionStorage unavailable
-    }
-  };
 
   /**
    * Whether a failed response should trigger the fallback API
@@ -241,7 +206,7 @@
    * @returns {boolean}
    */
   const shouldTryFallback = (response) => {
-    return response.status === 429 || response.status >= 500;
+    return !response || response.status !== 200;
   };
 
   /**
@@ -267,16 +232,9 @@
    * @returns {Promise<Response>}
    */
   const fetchApi = async (path) => {
-    const preferred = getPreferredApiBaseUrl();
     const bases = [CONFIG.apiBaseUrl];
-
     if (CONFIG.apiFallbackUrl && CONFIG.apiFallbackUrl !== CONFIG.apiBaseUrl) {
-      if (preferred === CONFIG.apiFallbackUrl) {
-        bases.length = 0;
-        bases.push(CONFIG.apiFallbackUrl, CONFIG.apiBaseUrl);
-      } else {
-        bases.push(CONFIG.apiFallbackUrl);
-      }
+      bases.push(CONFIG.apiFallbackUrl);
     }
 
     let lastError;
@@ -290,10 +248,6 @@
 
         if (shouldTryFallback(response) && i < bases.length - 1) {
           continue;
-        }
-
-        if (response.ok) {
-          setActiveApiBaseUrl(base);
         }
 
         return response;
@@ -564,9 +518,9 @@
     try {
       const response = await fetchApi('/ip');
       if (!response.ok) throw new Error('IP detection failed');
-      
+
       const data = await response.json();
-      const countryCode = (data.country_code || CONFIG.defaultCountry).toLowerCase();
+      const countryCode = (data.country_code || data.country || CONFIG.defaultCountry).toLowerCase();
       
       sessionStorage.setItem(CONFIG.sessionStorageKey, countryCode);
       sessionStorage.setItem(CONFIG.ipInfoStorageKey, JSON.stringify(data));
@@ -984,6 +938,12 @@
     // Detect country
     const detectedCountry = await detectCountry();
 
+    document.querySelectorAll('.form-group--phone input[type="tel"]').forEach((input) => {
+      if (!input.hasAttribute('data-mfz-phone')) {
+        input.setAttribute('data-mfz-phone', '');
+      }
+    });
+
     // Find all phone inputs
     const phoneInputs = document.querySelectorAll('[data-mfz-phone]');
     
@@ -1004,10 +964,37 @@
   };
 
   /**
+   * Reinitialize all phone widgets (e.g. after external DOM changes).
+   */
+  const reinitAllPhoneInputs = async () => {
+    if (typeof window.intlTelInput === 'undefined') return;
+
+    phoneInstances.forEach((instance, input) => {
+      try {
+        if (instance.iti && typeof instance.iti.destroy === 'function') {
+          instance.iti.destroy();
+        }
+      } catch (e) {}
+
+      const container = instance.container;
+      if (container && container.parentNode && input.parentNode === container) {
+        container.parentNode.insertBefore(input, container);
+        container.parentNode.removeChild(container);
+      }
+
+      input.removeAttribute('data-mfz-initialized');
+    });
+
+    phoneInstances.clear();
+    await initAllPhoneInputs();
+  };
+
+  /**
    * Public API
    */
   window.MFZPhone = {
     init: initAllPhoneInputs,
+    reinitAll: reinitAllPhoneInputs,
     detectCountry,
     validatePhone: validatePhoneNumber,
     getInstance: (input) => phoneInstances.get(input),
