@@ -275,16 +275,27 @@
     // Form submit handler
     document.getElementById('testForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      
+
+      const emailInput = document.querySelector('[data-mfz-email]');
+      const emailInst = window.MFZEmail && window.MFZEmail.getInstance(emailInput);
       const phoneInput = document.querySelector('[data-mfz-phone]');
       const isValid = MFZPhone.isValid(phoneInput);
       const formatted = MFZPhone.getFormattedNumber(phoneInput);
-      
+
+      if (emailInst && emailInst.validationState === 'invalid') {
+        log('Form blocked: ' + (emailInst.validationMessage || 'Invalid email'), 'error');
+        return;
+      }
+      if (emailInst && emailInst.lastRemote && emailInst.lastRemote.apiUnavailable) {
+        log('Email API not reachable from localhost — no-MX domains are not checked here. On meydanfz.ae they show “Your email domain is invalid”.', 'error');
+      }
+
       if (isValid) {
         log(`Form submitted! Phone: ${formatted}`, 'success');
-        document.getElementById('success').classList.add('show');
-        
-        // Log all form data
+        if (!(emailInst && emailInst.lastRemote && emailInst.lastRemote.apiUnavailable)) {
+          document.getElementById('success').classList.add('show');
+        }
+
         const formData = new FormData(e.target);
         for (const [key, value] of formData.entries()) {
           log(`  ${key}: ${value}`, 'info');

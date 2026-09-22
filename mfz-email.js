@@ -18,7 +18,61 @@
     debounceMs: 300,
     invalidMessage: "Please enter a valid email address",
     disposableMessage: "Please use your work or personal email",
+    domainMessage: "Your email domain is invalid",
   };
+
+  // Keep in sync with hono/lib/typo.ts
+  const COMMON_DOMAINS = [
+    "gmail.com",
+    "googlemail.com",
+    "google.com",
+    "yahoo.com",
+    "yahoo.co.uk",
+    "yahoo.ae",
+    "ymail.com",
+    "rocketmail.com",
+    "hotmail.com",
+    "hotmail.co.uk",
+    "hotmail.fr",
+    "outlook.com",
+    "outlook.ae",
+    "outlook.fr",
+    "live.com",
+    "msn.com",
+    "icloud.com",
+    "me.com",
+    "mac.com",
+    "aol.com",
+    "mail.com",
+    "gmx.com",
+    "zoho.com",
+    "fastmail.com",
+    "proton.me",
+    "protonmail.com",
+    "pm.me",
+    "duck.com",
+    "meydanfz.ae",
+  ];
+
+  // Tiny local list so yopmail is not suggested as hotmail before the API runs.
+  const LOCAL_DISPOSABLE = [
+    "mailinator.com",
+    "yopmail.com",
+    "guerrillamail.com",
+    "sharklasers.com",
+    "grr.la",
+    "tempmail.com",
+    "10minutemail.com",
+    "throwaway.email",
+    "trashmail.com",
+    "temp-mail.org",
+    "dispostable.com",
+    "getnada.com",
+    "moakt.com",
+    "mailnesia.com",
+  ];
+
+  const COMMON_TLDS = ["com", "co", "net", "org", "ae", "me", "io", "co.uk"];
 
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const BLOCKED_KEYWORDS = [
@@ -46,11 +100,103 @@
 
   const normalize = (value) => (value || "").trim().toLowerCase();
 
-  const localProblem = (email) => {
-    if (!EMAIL_RE.test(email) || !email.includes(".")) return "syntax";
-    const local = email.slice(0, email.indexOf("@"));
-    if (BLOCKED_KEYWORDS.some((kw) => local.includes(kw))) return "keyword";
+  const levenshtein = (a, b) => {
+    if (a === b) return 0;
+    const m = a.length;
+    const n = b.length;
+    if (!m) return n;
+    if (!n) return m;
+    const row = [];
+    for (let i = 0; i <= n; i += 1) row[i] = i;
+    for (let i = 1; i <= m; i += 1) {
+      let prev = i;
+      for (let j = 1; j <= n; j += 1) {
+        const next = a.charAt(i - 1) === b.charAt(j - 1) ? row[j - 1] : Math.min(row[j - 1], prev, row[j]) + 1;
+        row[j - 1] = prev;
+        prev = next;
+      }
+      row[n] = prev;
+    }
+    return row[n];
+  };
+
+  const closestDomain = (value, candidates) => {
+    let best;
+    let bestDist = Infinity;
+    const max = value.length <= 4 ? 1 : 2;
+    for (let i = 0; i < candidates.length; i += 1) {
+      const candidate = candidates[i];
+      if (candidate === value) return null;
+      const dist = levenshtein(value, candidate);
+      if (dist > 0 && dist <= max && dist < bestDist) {
+        best = candidate;
+        bestDist = dist;
+      }
+    }
+    return best || null;
+  };
+
+  const suggestTypo = (email) => {
+    const at = email.lastIndexOf("@");
+    if (at < 1) return null;
+    const local = email.slice(0, at);
+    const domain = email.slice(at + 1);
+    if (!domain.includes(".")) return null;
+    const match = closestDomain(domain, COMMON_DOMAINS);
+    if (match) return local + "@" + match;
+    const dot = domain.indexOf(".");
+    const sld = domain.slice(0, dot);
+    const tld = domain.slice(dot + 1);
+    const bases = [];
+    for (let i = 0; i < COMMON_DOMAINS.length; i += 1) {
+      const base = COMMON_DOMAINS[i].split(".")[0];
+      if (bases.indexOf(base) === -1) bases.push(base);
+    }
+    const sldMatch = closestDomain(sld, bases);
+    if (sldMatch && COMMON_TLDS.indexOf(tld) !== -1) {
+      for (let i = 0; i < COMMON_DOMAINS.length; i += 1) {
+        const candidate = COMMON_DOMAINS[i];
+        if (candidate.indexOf(sldMatch + ".") === 0 && candidate.lastIndexOf("." + tld) === candidate.length - tld.length - 1 && candidate !== domain) {
+          return local + "@" + candidate;
+        }
+      }
+    }
     return null;
+  };
+
+  const typoMessage = (suggestion) => "Did you mean " + suggestion + "?";
+
+  const isLocalDisposable = (domain) => {
+    const parts = domain.split(".").filter(Boolean);
+    for (let i = 0; i < parts.length - 1; i += 1) {
+      if (LOCAL_DISPOSABLE.indexOf(parts.slice(i).join(".")) !== -1) return true;
+    }
+    return false;
+  };
+
+  const localProblem = (email) => {
+    if (!EMAIL_RE.test(email) || !email.includes(".")) return { kind: "syntax" };
+    const at = email.indexOf("@");
+    const local = email.slice(0, at);
+    const domain = email.slice(at + 1);
+    if (BLOCKED_KEYWORDS.some((kw) => local.includes(kw))) return { kind: "keyword" };
+    if (isLocalDisposable(domain)) return { kind: "disposable" };
+    const suggestion = suggestTypo(email);
+    if (suggestion) return { kind: "typo", suggestion: suggestion };
+    return null;
+  };
+
+  const problemMessage = (problem) => {
+    if (problem.kind === "typo") return typoMessage(problem.suggestion);
+    if (problem.kind === "disposable") return CONFIG.disposableMessage;
+    return CONFIG.invalidMessage;
+  };
+
+  const remoteMessage = (remote) => {
+    if (remote.typo && remote.suggestion) return typoMessage(remote.suggestion);
+    if (remote.disposable) return CONFIG.disposableMessage;
+    if (remote.mx === false) return CONFIG.domainMessage;
+    return CONFIG.invalidMessage;
   };
 
   const createFeedback = (container) => {
@@ -77,10 +223,22 @@
       if (feedback) feedback.remove();
       if (state === "valid") container.classList.add("mfz-valid");
     } else {
-      container.classList.add(`mfz-${state}`);
+      container.classList.add("mfz-" + state);
       const feedback = createFeedback(container);
       feedback.textContent = message;
-      feedback.className = `mfz-email-feedback mfz-feedback-${state}`;
+      feedback.className = "mfz-email-feedback mfz-feedback-" + state;
+      if (state === "invalid" && instance.lastRemote && instance.lastRemote.suggestion) {
+        feedback.style.cursor = "pointer";
+        feedback.setAttribute("title", "Click to use " + instance.lastRemote.suggestion);
+        feedback.onclick = function () {
+          input.value = instance.lastRemote.suggestion;
+          handleValidation(input, true);
+        };
+      } else {
+        feedback.style.cursor = "";
+        feedback.removeAttribute("title");
+        feedback.onclick = null;
+      }
     }
 
     instance.isValid = state === "valid";
@@ -94,7 +252,7 @@
     try {
       const params = new URLSearchParams({ email });
       const response = await fetchWithTimeout(
-        `${CONFIG.apiBaseUrl}/email/validate?${params}`,
+        CONFIG.apiBaseUrl + "/email/validate?" + params,
         CONFIG.apiTimeoutMs
       );
 
@@ -107,6 +265,9 @@
         apiUnavailable: false,
         valid: body.valid === true,
         disposable: body.disposable === true,
+        typo: body.typo === true,
+        mx: body.mx === true,
+        suggestion: body.suggestion || "",
         email: body.email || email,
       };
       resultCache.set(email, result);
@@ -130,11 +291,18 @@
 
     const problem = localProblem(email);
     if (problem) {
-      if (isBlur || instance.hasBlurred) {
-        setState(input, "invalid", CONFIG.invalidMessage);
+      const showError = isBlur || instance.hasBlurred;
+      instance.hasBlurred = showError;
+      instance.lastRemote = {
+        valid: false,
+        local: true,
+        disposable: problem.kind === "disposable",
+        typo: problem.kind === "typo",
+        suggestion: problem.suggestion || "",
+      };
+      if (showError) {
+        setState(input, "invalid", problemMessage(problem));
       }
-      instance.hasBlurred = isBlur || instance.hasBlurred;
-      instance.lastRemote = { valid: false, local: true };
       return;
     }
 
@@ -162,29 +330,22 @@
       return;
     }
 
-    setState(
-      input,
-      "invalid",
-      result.disposable ? CONFIG.disposableMessage : CONFIG.invalidMessage
-    );
+    setState(input, "invalid", remoteMessage(result));
   };
 
   const allowSubmit = (input, instance) => {
     const email = normalize(input.value);
     if (!email) return true;
 
-    if (localProblem(email)) {
-      setState(input, "invalid", CONFIG.invalidMessage);
+    const problem = localProblem(email);
+    if (problem) {
+      setState(input, "invalid", problemMessage(problem));
       return false;
     }
 
     const remote = instance.lastRemote;
     if (remote && remote.valid === false && !remote.apiUnavailable) {
-      setState(
-        input,
-        "invalid",
-        remote.disposable ? CONFIG.disposableMessage : CONFIG.invalidMessage
-      );
+      setState(input, "invalid", remoteMessage(remote));
       return false;
     }
 
@@ -195,6 +356,8 @@
     if (instances.has(input) || input.hasAttribute("data-mfz-email-initialized")) {
       return;
     }
+
+    if (!input.parentNode) return;
 
     input.setAttribute("data-mfz-email-initialized", "true");
     if (!input.hasAttribute("data-mfz-email")) {
@@ -218,7 +381,10 @@
     let debounceTimer;
     input.addEventListener("input", () => {
       const instance = instances.get(input);
-      if (instance && instance.validationState === "invalid") setState(input, "idle");
+      if (instance) {
+        instance.lastRemote = null;
+        if (instance.validationState === "invalid") setState(input, "idle");
+      }
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => handleValidation(input, false), CONFIG.debounceMs);
     });
@@ -273,6 +439,8 @@
       return !!(instance && instance.isValid);
     },
     getInstance: (input) => instances.get(input),
+    suggestTypo: suggestTypo,
+    localProblem: localProblem,
   };
 
   if (document.readyState === "loading") {

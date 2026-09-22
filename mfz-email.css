@@ -41,10 +41,4 @@
   color: #F39C12;
 }
 
-.w-form .mfz-email-container {
-  margin-bottom: 10px;
-}
-
-.w-form .mfz-email-feedback {
-  margin-bottom: 12px;
-}
+/* Keep Webflow field spacing. Feedback sits under the input only. */

@@ -62,7 +62,9 @@ Add next to the phone assets. Pin a commit hash (same as phone). Do not use `@ma
 
 jsDelivr minifies from the source files (`mfz-email.js` / `.css`). Do not commit a separate `.min.js`. The source avoids `?.` / `catch {}` so older Terser on GitHub minify succeeds.
 
-Binds `data-mfz-email` and `form input[type="email"]`. Checks on blur. `demo@` / `fake@` / disposable fail on the field. If apiphone is down, the form still submits to Zoho. `test@` and `webmaster@` stay allowed.
+Binds `data-mfz-email` and `form input[type="email"]`. Checks on blur. `demo@` / `fake@` / disposable fail on the field. Common typos such as `gmaill.com` show “Did you mean gmail.com?”. Hosts with no MX show “Your email domain is invalid”, or a company suggestion from apiphone (`creogloball.com` → `creoglobal.co`). Click the suggestion to apply. If apiphone is down, the form still submits to Zoho. `test@` and `webmaster@` stay allowed.
+
+Keep live phone on `mfz-phone.js` (not `.min.js`). That file still uses `?.`, which older jsDelivr Terser cannot minify.
 
 ## How It Works
 
