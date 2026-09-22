@@ -56,9 +56,11 @@ That's it! The phone input will now have country detection and validation.
 Add next to the phone assets. Pin a commit hash (same as phone). Do not use `@main` on production.
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Creo-Global/mfz-phone-validation@COMMIT/mfz-email.css">
-<script src="https://cdn.jsdelivr.net/gh/Creo-Global/mfz-phone-validation@COMMIT/mfz-email.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Creo-Global/mfz-phone-validation@COMMIT/mfz-email.min.css">
+<script src="https://cdn.jsdelivr.net/gh/Creo-Global/mfz-phone-validation@COMMIT/mfz-email.min.js"></script>
 ```
+
+jsDelivr minifies from the source files (`mfz-email.js` / `.css`). Do not commit a separate `.min.js`. The source avoids `?.` / `catch {}` so older Terser on GitHub minify succeeds.
 
 Binds `data-mfz-email` and `form input[type="email"]`. Checks on blur. `demo@` / `fake@` / disposable fail on the field. If apiphone is down, the form still submits to Zoho. `test@` and `webmaster@` stay allowed.
 

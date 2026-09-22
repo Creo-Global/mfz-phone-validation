@@ -7,8 +7,9 @@
  * Fast local fail (syntax / demo|fake|sample|dummy|staging|noreply) shows an error
  * and blocks submit. MX / disposable go to apiphone on blur only.
  * If the API is down, slow, or rate-limited, the form still submits to Zoho.
+ * jsDelivr: pin mfz-email.min.js (minifies this file). No optional chaining.
  */
-(function () {
+;(function () {
   "use strict";
 
   const CONFIG = {
@@ -110,7 +111,7 @@
       };
       resultCache.set(email, result);
       return result;
-    } catch {
+    } catch (err) {
       return { apiUnavailable: true, valid: null };
     }
   };
@@ -217,7 +218,7 @@
     let debounceTimer;
     input.addEventListener("input", () => {
       const instance = instances.get(input);
-      if (instance?.validationState === "invalid") setState(input, "idle");
+      if (instance && instance.validationState === "invalid") setState(input, "idle");
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => handleValidation(input, false), CONFIG.debounceMs);
     });
@@ -267,7 +268,10 @@
 
   window.MFZEmail = {
     init: initAll,
-    isValid: (input) => instances.get(input)?.isValid === true,
+    isValid: (input) => {
+      const instance = instances.get(input);
+      return !!(instance && instance.isValid);
+    },
     getInstance: (input) => instances.get(input),
   };
 
@@ -287,8 +291,9 @@
     const hasNew = mutations.some((mutation) =>
       [...mutation.addedNodes].some((node) => {
         if (node.nodeType !== Node.ELEMENT_NODE) return false;
-        if (node.matches?.("[data-mfz-email], form input[type='email']")) return true;
-        return Boolean(node.querySelector?.("[data-mfz-email], form input[type='email']"));
+        var emailSelector = "[data-mfz-email], form input[type='email']";
+        if (typeof node.matches === "function" && node.matches(emailSelector)) return true;
+        return !!(typeof node.querySelector === "function" && node.querySelector(emailSelector));
       })
     );
     if (hasNew) initAll();
