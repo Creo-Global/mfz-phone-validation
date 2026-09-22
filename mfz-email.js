@@ -238,13 +238,22 @@
       if (state === "invalid" && instance.lastRemote && instance.lastRemote.suggestion) {
         feedback.style.cursor = "pointer";
         feedback.setAttribute("title", "Click to use " + instance.lastRemote.suggestion);
-        feedback.onclick = function () {
-          input.value = instance.lastRemote.suggestion;
+        feedback.onmousedown = function (e) {
+          e.preventDefault();
+        };
+        feedback.onclick = function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var suggestion = instance.lastRemote && instance.lastRemote.suggestion;
+          if (!suggestion) return;
+          input.value = suggestion;
           handleValidation(input, true);
+          input.focus();
         };
       } else {
         feedback.style.cursor = "";
         feedback.removeAttribute("title");
+        feedback.onmousedown = null;
         feedback.onclick = null;
       }
     }

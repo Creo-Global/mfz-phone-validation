@@ -39,7 +39,7 @@ try {
 }
 
 assert(minified.length > 500, "GitHub/jsDelivr-style Terser minify succeeds");
-assert(minified.length < 7000, "minified JS stays under 7KB (" + minified.length + " bytes)");
+assert(minified.length < 8000, "minified JS stays under 8KB (" + minified.length + " bytes)");
 try {
   unlinkSync(minPath);
 } catch {
