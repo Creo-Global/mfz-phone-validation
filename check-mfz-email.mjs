@@ -22,6 +22,7 @@ assert(src.includes("ymail.com") && src.includes("mail.com") && src.includes("ma
 assert(src.includes("LOCAL_DISPOSABLE") && src.includes("yopmail.com"), "tiny local disposable list is present");
 assert(src.includes("apiUnavailable"), "API-down still allows submit");
 assert(src.includes("Your email domain is invalid"), "no-MX domains show a domain error");
+assert(src.includes("debug: false"), "production debug logging is off");
 assert(!css.includes("margin-bottom: 10px"), "CSS does not add extra Webflow field gap");
 assert(src.length < 18_000, "source stays small for jsDelivr minify (" + src.length + " bytes)");
 

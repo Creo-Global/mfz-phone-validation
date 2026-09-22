@@ -19,6 +19,14 @@
     invalidMessage: "Please enter a valid email address",
     disposableMessage: "Please use your work or personal email",
     domainMessage: "Your email domain is invalid",
+    debug: false,
+  };
+
+  const log = function () {
+    if (!CONFIG.debug) return;
+    var args = Array.prototype.slice.call(arguments);
+    args.unshift("[MFZ Email]");
+    console.log.apply(console, args);
   };
 
   // Keep in sync with hono/lib/typo.ts
@@ -441,6 +449,10 @@
     getInstance: (input) => instances.get(input),
     suggestTypo: suggestTypo,
     localProblem: localProblem,
+    setDebug: function (on) {
+      CONFIG.debug = on === true;
+      log("debug", CONFIG.debug);
+    },
   };
 
   if (document.readyState === "loading") {
