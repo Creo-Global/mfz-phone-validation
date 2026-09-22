@@ -1,0 +1,50 @@
+/**
+ * MFZ Email — validation states for Webflow email fields
+ * Matches mfz-phone branding. Does not change the input layout.
+ */
+
+.mfz-email-container {
+  position: relative;
+  width: 100%;
+}
+
+.mfz-email-container input[type="email"],
+.mfz-email-container input[data-mfz-email] {
+  width: 100%;
+}
+
+.mfz-email-container.mfz-valid input {
+  border-color: #06603A;
+}
+
+.mfz-email-container.mfz-invalid input {
+  border-color: #FF2D2D;
+}
+
+.mfz-email-container.mfz-validating input {
+  border-color: #F39C12;
+}
+
+.mfz-email-feedback {
+  font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin-top: 6px;
+}
+
+.mfz-email-feedback.mfz-feedback-invalid {
+  color: #FF2D2D;
+}
+
+.mfz-email-feedback.mfz-feedback-validating {
+  color: #F39C12;
+}
+
+.w-form .mfz-email-container {
+  margin-bottom: 10px;
+}
+
+.w-form .mfz-email-feedback {
+  margin-bottom: 12px;
+}

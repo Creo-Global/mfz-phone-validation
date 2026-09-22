@@ -51,6 +51,17 @@ In Webflow Designer:
 
 That's it! The phone input will now have country detection and validation.
 
+### Email fields
+
+Add next to the phone assets. Pin a commit hash (same as phone). Do not use `@main` on production.
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Creo-Global/mfz-phone-validation@COMMIT/mfz-email.css">
+<script src="https://cdn.jsdelivr.net/gh/Creo-Global/mfz-phone-validation@COMMIT/mfz-email.js"></script>
+```
+
+Binds `data-mfz-email` and `form input[type="email"]`. Checks on blur. `demo@` / `fake@` / disposable fail on the field. If apiphone is down, the form still submits to Zoho. `test@` and `webmaster@` stay allowed.
+
 ## How It Works
 
 ```

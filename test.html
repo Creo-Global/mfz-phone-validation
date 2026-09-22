@@ -10,6 +10,7 @@
   
   <!-- MFZ Phone CSS -->
   <link rel="stylesheet" href="mfz-phone.css">
+  <link rel="stylesheet" href="mfz-email.css">
   
   <style>
     * {
@@ -210,7 +211,7 @@
         
         <div class="form-group">
           <label for="email">Email Address</label>
-          <input type="email" id="email" name="email" placeholder="john@example.com" required>
+          <input type="email" id="email" name="email" data-mfz-email placeholder="john@example.com" required>
         </div>
         
         <div class="form-group">
@@ -236,8 +237,9 @@
   <!-- intl-tel-input Library -->
   <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/intlTelInput.min.js"></script>
   
-  <!-- MFZ Phone Library -->
+  <!-- MFZ Phone + Email -->
   <script src="mfz-phone.js"></script>
+  <script src="mfz-email.js"></script>
   
   <script>
     // Console logger
